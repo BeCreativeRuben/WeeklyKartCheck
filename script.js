@@ -103,6 +103,14 @@ function showKartChecklist(kartNumber) {
     currentKartNumber.textContent = kartNumber;
     currentKartNumberOther.textContent = kartNumber;
     
+    // Smooth scroll to the checklist section
+    setTimeout(() => {
+        checklistSection.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+        });
+    }, 100);
+    
     // Load existing problems for this kart
     loadKartProblems(kartNumber);
 }
@@ -290,14 +298,25 @@ function toggleLanguage() {
 
 // Update language throughout the interface
 function updateLanguage() {
+    // Store current kart numbers before translation
+    const currentKartNumber = document.getElementById('currentKartNumber');
+    const currentKartNumberOther = document.getElementById('currentKartNumberOther');
+    const storedKartNumber = currentKartNumber ? currentKartNumber.textContent : '';
+    const storedKartNumberOther = currentKartNumberOther ? currentKartNumberOther.textContent : '';
+    
     // Update all elements with translation data
     const elements = document.querySelectorAll('[data-en][data-nl]');
     elements.forEach(element => {
-        // Don't update elements that contain dynamic content like kart numbers
-        if (!element.id.includes('currentKartNumber') && !element.id.includes('currentKartNumberOther')) {
-            element.textContent = element.getAttribute(`data-${currentLanguage}`);
-        }
+        element.textContent = element.getAttribute(`data-${currentLanguage}`);
     });
+    
+    // Restore kart numbers after translation
+    if (currentKartNumber && storedKartNumber) {
+        currentKartNumber.textContent = storedKartNumber;
+    }
+    if (currentKartNumberOther && storedKartNumberOther) {
+        currentKartNumberOther.textContent = storedKartNumberOther;
+    }
     
     // Update placeholders
     const placeholders = document.querySelectorAll('[data-en-placeholder][data-nl-placeholder]');

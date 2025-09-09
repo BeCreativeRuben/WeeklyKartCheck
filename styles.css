@@ -341,6 +341,7 @@ header p {
     border-radius: 10px;
     border: 2px solid #27ae60;
     margin-bottom: 25px;
+    scroll-margin-top: 20px; /* Add space when scrolling to this element */
 }
 
 .kart-checklist-section h3 {
