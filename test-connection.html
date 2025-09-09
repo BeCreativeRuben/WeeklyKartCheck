@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Google Sheets Connection</title>
+</head>
+<body>
+    <h1>Testing Google Sheets Connection</h1>
+    <button onclick="testConnection()">Test Connection</button>
+    <div id="result"></div>
+
+    <script>
+    async function testConnection() {
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwyJu5BfLSrNHIyfjbwlDOv7ong6PFhIIBfoRVtaurZxx37aX-oK8CGVrsXP2l7fbok/exec';
+        
+        const testData = {
+            date: 'Test Date',
+            center: 'Gent 2025',
+            kartsWithIssues: [1, 2, 3],
+            kartProblems: {
+                1: { issues: ['brakes'], otherFailures: 'Test problem' },
+                2: { issues: ['tires'], otherFailures: '' },
+                3: { issues: ['engine'], otherFailures: 'Another test' }
+            },
+            otherFailures: 'Test other failures',
+            inspector: 'Test User'
+        };
+        
+        try {
+            console.log('Sending data:', testData);
+            console.log('To URL:', WEB_APP_URL);
+            
+            const response = await fetch(WEB_APP_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain;charset=UTF-8'
+                },
+                body: JSON.stringify(testData)
+            });
+            
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+            
+            const responseText = await response.text();
+            console.log('Raw response:', responseText);
+            
+            let result;
+            try {
+                result = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error('JSON parse error:', parseError);
+                document.getElementById('result').innerHTML = 
+                    '<h2>Parse Error!</h2><p>Could not parse response as JSON</p><p>Raw response: ' + responseText + '</p>';
+                return;
+            }
+            
+            console.log('Parsed result:', result);
+            
+            if (result.success) {
+                document.getElementById('result').innerHTML = 
+                    '<h2>Success!</h2><p>Response: ' + JSON.stringify(result, null, 2) + '</p>' +
+                    '<p><a href="' + result.spreadsheetUrl + '" target="_blank">Open Spreadsheet</a></p>';
+            } else {
+                document.getElementById('result').innerHTML = 
+                    '<h2>Error from server!</h2><p>' + result.error + '</p>';
+            }
+        } catch (error) {
+            console.error('Fetch error:', error);
+            document.getElementById('result').innerHTML = 
+                '<h2>Error!</h2><p>' + error.message + '</p>';
+        }
+    }
+    </script>
+</body>
+</html>
