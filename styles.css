@@ -55,13 +55,15 @@ header::before {
     height: 200%;
     background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
     transform: rotate(45deg);
-    animation: shine 3s infinite;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
-@keyframes shine {
-    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+.header:hover::before {
+    opacity: 1;
 }
+
+/* Removed shine keyframes - now using hover effect instead */
 
 .header-top {
     display: flex;
@@ -142,10 +144,11 @@ header p {
     font-size: 1.1rem;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
     box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
     position: relative;
     overflow: hidden;
+    will-change: transform;
 }
 
 .kart-button::before {
@@ -164,8 +167,8 @@ header p {
 }
 
 .kart-button:hover {
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(255, 107, 53, 0.3);
     border-color: #f7931e;
 }
 
@@ -191,14 +194,16 @@ header p {
     background: linear-gradient(145deg, #e74c3c, #c0392b);
     border-color: #e74c3c;
     box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
-    animation: pulse 2s infinite;
+    /* Removed constant pulse animation for better performance */
 }
 
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+.kart-button.has-issues:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+    transition: all 0.2s ease;
 }
+
+/* Removed pulse keyframes - now using hover effect instead */
 
 /* Checklist Form */
 .checklist-form {
