@@ -9,17 +9,12 @@ let isSubmitting = false; // Prevent double submission
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM Content Loaded - Initializing app...');
-    
     // Reset everything on page load
     resetAllData();
     
-    console.log('Calling initializeKartGrid...');
     initializeKartGrid();
     setupEventListeners();
     updateCurrentDate();
-    
-    console.log('App initialization complete');
 });
 
 // Update current date display
@@ -31,13 +26,13 @@ function updateCurrentDate() {
 function initializeKartGrid() {
     const kartGrid = document.querySelector('.kart-grid');
     
-    // Debug: Check if kartGrid exists
     if (!kartGrid) {
         console.error('Kart grid element not found!');
         return;
     }
     
-    console.log('Initializing kart grid...');
+    // Clear any existing buttons first
+    kartGrid.innerHTML = '';
     
     for (let i = 1; i <= 36; i++) {
         const kartButton = document.createElement('button');
@@ -47,8 +42,6 @@ function initializeKartGrid() {
         kartButton.addEventListener('click', () => selectKartForEditing(i));
         kartGrid.appendChild(kartButton);
     }
-    
-    console.log('Kart grid initialized with', kartGrid.children.length, 'buttons');
 }
 
 // Setup event listeners
