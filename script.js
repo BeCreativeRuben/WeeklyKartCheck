@@ -304,10 +304,13 @@ function updateLanguage() {
     const storedKartNumber = currentKartNumber ? currentKartNumber.textContent : '';
     const storedKartNumberOther = currentKartNumberOther ? currentKartNumberOther.textContent : '';
     
-    // Update all elements with translation data
+    // Update all elements with translation data, but skip kart number spans
     const elements = document.querySelectorAll('[data-en][data-nl]');
     elements.forEach(element => {
-        element.textContent = element.getAttribute(`data-${currentLanguage}`);
+        // Skip elements that contain kart numbers
+        if (element.id !== 'currentKartNumber' && element.id !== 'currentKartNumberOther') {
+            element.textContent = element.getAttribute(`data-${currentLanguage}`);
+        }
     });
     
     // Restore kart numbers after translation
