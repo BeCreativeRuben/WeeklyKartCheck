@@ -243,7 +243,6 @@ function resetAllData() {
     // Clear all forms
     clearKartChecklistForm();
     document.getElementById('otherFailures').value = '';
-    document.getElementById('inspectorName').value = '';
     
     // Hide checklist section
     document.getElementById('kartChecklistSection').style.display = 'none';
@@ -346,25 +345,14 @@ async function submitAllChecklists() {
     if (isSubmitting) return;
     
     // Check if any data has been entered at all
-    const inspectorName = document.getElementById('inspectorName').value.trim();
     const otherFailures = document.getElementById('otherFailures').value.trim();
     const hasAnyKartProblems = Object.keys(kartProblems).length > 0;
     
-    if (!inspectorName && selectedKarts.size === 0 && !otherFailures && !hasAnyKartProblems) {
+    if (selectedKarts.size === 0 && !otherFailures && !hasAnyKartProblems) {
         const message = currentLanguage === 'en' 
-            ? '⚠️ Please fill in some information before submitting. Select karts with issues, enter inspector name, or add general failures.'
-            : '⚠️ Vul eerst wat informatie in voordat u verstuurt. Selecteer karts met problemen, voer inspecteur naam in, of voeg algemene storingen toe.';
+            ? '⚠️ Please fill in some information before submitting. Select karts with issues or add general failures.'
+            : '⚠️ Vul eerst wat informatie in voordat u verstuurt. Selecteer karts met problemen of voeg algemene storingen toe.';
         showMessage(message, 'error');
-        return;
-    }
-    
-    // Validate inspector name
-    if (!inspectorName) {
-        const message = currentLanguage === 'en' 
-            ? '❌ Inspector name is required! Please enter your name before submitting.'
-            : '❌ Inspecteur naam is verplicht! Voer uw naam in voordat u verstuurt.';
-        showMessage(message, 'error');
-        document.getElementById('inspectorName').focus();
         return;
     }
     
@@ -403,7 +391,7 @@ async function submitAllChecklists() {
         kartsWithIssues: Array.from(selectedKarts).sort((a, b) => a - b),
         kartProblems: kartProblems,
         otherFailures: otherFailuresValue,
-        inspector: inspectorName
+        inspector: 'User' // Default inspector name
     };
     
     // Store data locally
@@ -443,9 +431,6 @@ async function submitAllChecklists() {
 // Clear all selections and form
 function clearAll() {
     resetAllData();
-    
-    // Clear inspector field
-    document.getElementById('inspectorName').value = '';
     
     const message = currentLanguage === 'en' 
         ? 'All selections cleared.'
