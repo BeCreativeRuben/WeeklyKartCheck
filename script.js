@@ -243,6 +243,7 @@ function resetAllData() {
     // Clear all forms
     clearKartChecklistForm();
     document.getElementById('otherFailures').value = '';
+    document.getElementById('inspectorName').value = '';
     
     // Hide checklist section
     document.getElementById('kartChecklistSection').style.display = 'none';
@@ -344,6 +345,17 @@ function updateLanguage() {
 async function submitAllChecklists() {
     if (isSubmitting) return;
     
+    // Validate inspector name
+    const inspectorName = document.getElementById('inspectorName').value.trim();
+    if (!inspectorName) {
+        const message = currentLanguage === 'en' 
+            ? 'Please enter the inspector name before submitting.'
+            : 'Voer de inspecteur naam in voordat u verstuurt.';
+        showMessage(message, 'error');
+        document.getElementById('inspectorName').focus();
+        return;
+    }
+    
     if (selectedKarts.size === 0) {
         const message = currentLanguage === 'en' 
             ? 'Please select at least one kart with issues before submitting.'
@@ -379,7 +391,7 @@ async function submitAllChecklists() {
         kartsWithIssues: Array.from(selectedKarts).sort((a, b) => a - b),
         kartProblems: kartProblems,
         otherFailures: otherFailures,
-        inspector: 'User' // You can add user authentication here
+        inspector: inspectorName
     };
     
     // Store data locally
@@ -419,6 +431,9 @@ async function submitAllChecklists() {
 // Clear all selections and form
 function clearAll() {
     resetAllData();
+    
+    // Clear inspector field
+    document.getElementById('inspectorName').value = '';
     
     const message = currentLanguage === 'en' 
         ? 'All selections cleared.'

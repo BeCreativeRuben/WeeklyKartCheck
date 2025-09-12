@@ -436,6 +436,60 @@ header p {
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
+/* Inspector Section */
+.inspector-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    margin-bottom: 25px;
+}
+
+.inspector-section h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.inspector-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.inspector-input-group label {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 1rem;
+}
+
+.inspector-input-group input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+}
+
+.inspector-input-group input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.inspector-input-group input:invalid {
+    border-color: #e74c3c;
+}
+
+.required-indicator {
+    color: #e74c3c;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-left: 5px;
+}
+
 /* Form Actions */
 .form-actions {
     display: flex;
