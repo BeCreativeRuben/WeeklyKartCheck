@@ -345,12 +345,24 @@ function updateLanguage() {
 async function submitAllChecklists() {
     if (isSubmitting) return;
     
-    // Validate inspector name
+    // Check if any data has been entered at all
     const inspectorName = document.getElementById('inspectorName').value.trim();
+    const otherFailures = document.getElementById('otherFailures').value.trim();
+    const hasAnyKartProblems = Object.keys(kartProblems).length > 0;
+    
+    if (!inspectorName && selectedKarts.size === 0 && !otherFailures && !hasAnyKartProblems) {
+        const message = currentLanguage === 'en' 
+            ? '⚠️ Please fill in some information before submitting. Select karts with issues, enter inspector name, or add general failures.'
+            : '⚠️ Vul eerst wat informatie in voordat u verstuurt. Selecteer karts met problemen, voer inspecteur naam in, of voeg algemene storingen toe.';
+        showMessage(message, 'error');
+        return;
+    }
+    
+    // Validate inspector name
     if (!inspectorName) {
         const message = currentLanguage === 'en' 
-            ? 'Please enter the inspector name before submitting.'
-            : 'Voer de inspecteur naam in voordat u verstuurt.';
+            ? '❌ Inspector name is required! Please enter your name before submitting.'
+            : '❌ Inspecteur naam is verplicht! Voer uw naam in voordat u verstuurt.';
         showMessage(message, 'error');
         document.getElementById('inspectorName').focus();
         return;
@@ -358,8 +370,8 @@ async function submitAllChecklists() {
     
     if (selectedKarts.size === 0) {
         const message = currentLanguage === 'en' 
-            ? 'Please select at least one kart with issues before submitting.'
-            : 'Selecteer ten minste één kart met problemen voordat u verstuurt.';
+            ? '⚠️ Please select at least one kart with issues before submitting.'
+            : '⚠️ Selecteer ten minste één kart met problemen voordat u verstuurt.';
         showMessage(message, 'error');
         return;
     }
@@ -381,7 +393,7 @@ async function submitAllChecklists() {
     const submitBtn = document.getElementById('submitAllChecklists');
     submitBtn.classList.add('loading');
     
-    const otherFailures = document.getElementById('otherFailures').value.trim();
+    const otherFailuresValue = document.getElementById('otherFailures').value.trim();
     
     // Prepare data for submission
     const checklistEntry = {
@@ -390,7 +402,7 @@ async function submitAllChecklists() {
         timestamp: new Date().toISOString(),
         kartsWithIssues: Array.from(selectedKarts).sort((a, b) => a - b),
         kartProblems: kartProblems,
-        otherFailures: otherFailures,
+        otherFailures: otherFailuresValue,
         inspector: inspectorName
     };
     
