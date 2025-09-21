@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Google Apps Script Connection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        .success { border-color: #4CAF50; background: #f1f8e9; }
+        .error { border-color: #f44336; background: #ffebee; }
+        .info { border-color: #2196F3; background: #e3f2fd; }
+        .warning { border-color: #ff9800; background: #fff3e0; }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover { background: #1976D2; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #2196F3;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .url-display {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Debug Google Apps Script Connection</h1>
+        <p>This page helps diagnose connection issues with your Google Apps Script.</p>
+
+        <div class="test-section info">
+            <h3>📋 Current Configuration</h3>
+            <div class="url-display">
+                <strong>Web App URL:</strong><br>
+                <span id="currentUrl">Loading...</span>
+            </div>
+            <p><strong>Expected Response:</strong> JSON with success: true</p>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Test 1: Basic Connection Test</h3>
+            <p>Tests if the Google Apps Script is accessible and responding.</p>
+            <button onclick="testBasicConnection()" id="basicTestBtn">Test Basic Connection</button>
+            <div id="basicTestResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📤 Test 2: POST Request Test</h3>
+            <p>Tests if the script accepts POST requests with data.</p>
+            <button onclick="testPostRequest()" id="postTestBtn">Test POST Request</button>
+            <div id="postTestResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🌐 Test 3: CORS Test</h3>
+            <p>Tests if CORS headers are properly configured.</p>
+            <button onclick="testCORS()" id="corsTestBtn">Test CORS</button>
+            <div id="corsTestResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section warning">
+            <h3>⚠️ Common Issues & Solutions</h3>
+            <ul>
+                <li><strong>Failed to fetch:</strong> Usually means the script isn't deployed or URL is wrong</li>
+                <li><strong>CORS error:</strong> Script needs to be deployed as "Anyone" can access</li>
+                <li><strong>403 Forbidden:</strong> Script permissions issue</li>
+                <li><strong>404 Not Found:</strong> Wrong URL or script not deployed</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🔗 Quick Links</h3>
+            <p>
+                <a href="https://script.google.com/macros/s/AKfycbz1t9gfTsOQbf8Wk2lOQy6m5OHoIQ__z7zOkI7esmI/dev" target="_blank">
+                    📝 Open Google Apps Script Editor
+                </a>
+            </p>
+            <p>
+                <a href="https://docs.google.com/spreadsheets/d/1sCTKJzF1b7pZ5bB1AFD8Y-Hzx2HXI4x5AhVMNVi6gM8/edit" target="_blank">
+                    📊 Open Google Spreadsheet
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz1t9gfTsOQbf8Wk2lOQy6m5OHoIQ__z7zOkI7esmI/exec';
+        
+        // Display current URL
+        document.getElementById('currentUrl').textContent = WEB_APP_URL;
+
+        async function testBasicConnection() {
+            const testBtn = document.getElementById('basicTestBtn');
+            const resultDiv = document.getElementById('basicTestResult');
+            
+            testBtn.innerHTML = '<span class="loading"></span> Testing...';
+            testBtn.disabled = true;
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            resultDiv.textContent = 'Testing basic connection...';
+
+            try {
+                console.log('Testing URL:', WEB_APP_URL);
+                
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', [...response.headers.entries()]);
+                
+                const text = await response.text();
+                console.log('Response text:', text);
+                
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ CONNECTION SUCCESSFUL!
+
+Status: ${response.status} ${response.statusText}
+Headers: ${JSON.stringify([...response.headers.entries()], null, 2)}
+Response: ${text}`;
+                
+            } catch (error) {
+                console.error('Connection test failed:', error);
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ CONNECTION FAILED: ${error.message}
+
+Error details:
+- Name: ${error.name}
+- Stack: ${error.stack}
+
+This usually means:
+1. The script isn't deployed as a web app
+2. The URL is incorrect
+3. The script has syntax errors
+4. Network/CORS issues`;
+            } finally {
+                testBtn.innerHTML = 'Test Basic Connection';
+                testBtn.disabled = false;
+            }
+        }
+
+        async function testPostRequest() {
+            const testBtn = document.getElementById('postTestBtn');
+            const resultDiv = document.getElementById('postTestResult');
+            
+            testBtn.innerHTML = '<span class="loading"></span> Testing...';
+            testBtn.disabled = true;
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            resultDiv.textContent = 'Testing POST request...';
+
+            try {
+                const testData = {
+                    date: new Date().toLocaleDateString('en-GB'),
+                    center: 'Gent 2025',
+                    timestamp: new Date().toISOString(),
+                    submissionId: 'DEBUG_TEST_' + Date.now(),
+                    kartsWithIssues: [1, 2],
+                    kartProblems: {
+                        1: { issues: ['test_problem'], otherFailures: 'Test remark' },
+                        2: { issues: ['another_test'], otherFailures: 'Another test remark' }
+                    },
+                    otherFailures: 'Debug test failure',
+                    inspector: 'Debug User'
+                };
+
+                console.log('Sending test data:', testData);
+
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=UTF-8'
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                console.log('POST Response status:', response.status);
+                console.log('POST Response headers:', [...response.headers.entries()]);
+
+                const text = await response.text();
+                console.log('POST Response text:', text);
+
+                let jsonResponse;
+                try {
+                    jsonResponse = JSON.parse(text);
+                } catch (e) {
+                    jsonResponse = { raw: text };
+                }
+
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ POST REQUEST SUCCESSFUL!
+
+Status: ${response.status} ${response.statusText}
+Response: ${JSON.stringify(jsonResponse, null, 2)}
+
+This means your script is working correctly!`;
+                
+            } catch (error) {
+                console.error('POST test failed:', error);
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ POST REQUEST FAILED: ${error.message}
+
+Error details:
+- Name: ${error.name}
+- Stack: ${error.stack}
+
+This usually means:
+1. The script has syntax errors
+2. The doPost function isn't working
+3. Spreadsheet permissions issue
+4. The script isn't deployed properly`;
+            } finally {
+                testBtn.innerHTML = 'Test POST Request';
+                testBtn.disabled = false;
+            }
+        }
+
+        async function testCORS() {
+            const testBtn = document.getElementById('corsTestBtn');
+            const resultDiv = document.getElementById('corsTestResult');
+            
+            testBtn.innerHTML = '<span class="loading"></span> Testing...';
+            testBtn.disabled = true;
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            resultDiv.textContent = 'Testing CORS configuration...';
+
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers')
+                };
+
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ CORS TEST COMPLETED!
+
+Status: ${response.status}
+CORS Headers: ${JSON.stringify(corsHeaders, null, 2)}
+
+Note: Google Apps Script handles CORS automatically when deployed as web app.`;
+                
+            } catch (error) {
+                console.error('CORS test failed:', error);
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ CORS TEST FAILED: ${error.message}
+
+This is usually not a problem - Google Apps Script handles CORS automatically.`;
+            } finally {
+                testBtn.innerHTML = 'Test CORS';
+                testBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
