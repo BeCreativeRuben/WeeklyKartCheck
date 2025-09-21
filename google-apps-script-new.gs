@@ -33,10 +33,10 @@ function doPost(e) {
     console.log('Generated submission ID:', submissionId);
     
     // Process old system (preserve existing functionality)
-    await processOldSystem(ss, data, submissionId);
+    processOldSystem(ss, data, submissionId);
     
     // Process new system
-    await processNewSystem(ss, data, submissionId);
+    processNewSystem(ss, data, submissionId);
     
     const result = {
       success: true,
@@ -62,7 +62,7 @@ function doPost(e) {
 }
 
 // Process data for the old system (preserve existing functionality)
-async function processOldSystem(ss, data, submissionId) {
+function processOldSystem(ss, data, submissionId) {
   console.log('Processing old system...');
   
   // Rename existing sheet if it exists and is still called 'Submissions'
@@ -117,7 +117,7 @@ async function processOldSystem(ss, data, submissionId) {
 }
 
 // Process data for the new system
-async function processNewSystem(ss, data, submissionId) {
+function processNewSystem(ss, data, submissionId) {
   console.log('Processing new system...');
   
   const currentDate = data.date || new Date().toLocaleDateString();
