@@ -748,7 +748,7 @@ function showSuccessAnimation(kartCount, issueCount, submissionId = null) {
 // Google Sheets integration
 async function submitToGoogleSheets(data) {
     // Replace this URL with your actual Google Apps Script web app URL
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwyJu5BfLSrNHIyfjbwlDOv7ong6PFhIIBfoRVtaurZxx37aX-oK8CGVrsXP2l7fbok/exec';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz1t9gfTsOQbf8Wk2lOQy6m5OHoIQ__z7zOkI7esmI/exec';
     
     try {
         const response = await fetch(WEB_APP_URL, {
