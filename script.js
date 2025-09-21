@@ -251,6 +251,7 @@ function resetAllData() {
     // Clear all forms
     clearKartChecklistForm();
     document.getElementById('otherFailures').value = '';
+    document.getElementById('inspectorName').value = '';
     
     // Hide checklist section
     document.getElementById('kartChecklistSection').style.display = 'none';
@@ -390,6 +391,7 @@ async function submitAllChecklists() {
     submitBtn.classList.add('loading');
     
     const otherFailuresValue = document.getElementById('otherFailures').value.trim();
+    const inspectorName = document.getElementById('inspectorName').value.trim() || 'User'; // Use input or default
     
     // Generate unique submission ID
     const submissionId = 'SUB_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -403,7 +405,7 @@ async function submitAllChecklists() {
         kartsWithIssues: Array.from(selectedKarts).sort((a, b) => a - b),
         kartProblems: kartProblems,
         otherFailures: otherFailuresValue,
-        inspector: 'User' // Default inspector name
+        inspector: inspectorName // Use inspector name from input
     };
     
     // Store data locally
