@@ -1,5 +1,21 @@
 # Google Sheets Setup - Step by Step Guide
 
+## 🆕 NEW SYSTEM OVERVIEW
+
+The system now creates **4 sheets** in your Google Spreadsheet:
+
+1. **Submissions_OLD** - Your existing data (preserved and continues working)
+2. **Kart_Overview** - Complete tracking of all 36 karts for every check
+3. **Error_Log** - Detailed log of all problems found
+4. **Submissions_Summary** - Weekly check summaries
+
+### What's New:
+- ✅ **All 36 karts tracked** on every submission (even "good" ones)
+- ✅ **Individual problem tracking** with specific details
+- ✅ **Easy filtering** by kart number, date, or problem type
+- ✅ **Old system preserved** - no data loss
+- ✅ **Unique submission IDs** for tracking
+
 ## Method 1: Google Apps Script (Recommended - Easiest)
 
 ### Step 1: Open Your Spreadsheet
@@ -10,44 +26,16 @@
 1. In your spreadsheet, click **"Extensions"** in the menu bar
 2. Click **"Apps Script"**
 3. Delete all the existing code in the editor
-4. Copy and paste this code:
+4. Copy and paste the **NEW** code from `google-apps-script-new.gs`:
 
-```javascript
-function doPost(e) {
-  try {
-    const sheet = SpreadsheetApp.getActiveSheet();
-    const data = JSON.parse(e.postData.contents);
-    
-    // Add headers if this is the first row
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow(['Date', 'Center', 'Karts with Issues', 'Individual Problems', 'Other Failures', 'Inspector', 'Timestamp']);
-    }
-    
-    const row = [
-      data.date,
-      data.center,
-      data.kartsWithIssues.join(', '),
-      Object.keys(data.kartProblems).map(kartNum => {
-        const problems = data.kartProblems[kartNum];
-        return `Kart ${kartNum}: ${problems.issues.join(', ')}${problems.otherFailures ? ` (${problems.otherFailures})` : ''}`;
-      }).join('; '),
-      data.otherFailures || 'None',
-      data.inspector,
-      new Date().toLocaleString()
-    ];
-    
-    sheet.appendRow(row);
-    
-    return ContentService
-      .createTextOutput(JSON.stringify({success: true}))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (error) {
-    return ContentService
-      .createTextOutput(JSON.stringify({success: false, error: error.toString()}))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
-```
+**⚠️ IMPORTANT**: Use the new script file (`google-apps-script-new.gs`) which includes both old and new systems!
+
+The new script will:
+- ✅ Preserve your existing "Submissions" sheet as "Submissions_OLD"
+- ✅ Create 3 new sheets: "Kart_Overview", "Error_Log", "Submissions_Summary"
+- ✅ Track all 36 karts on every submission
+- ✅ Generate unique submission IDs
+- ✅ Maintain backward compatibility
 
 ### Step 3: Save the Script
 1. Click **"Save"** (Ctrl+S)
@@ -106,7 +94,49 @@ async function submitToGoogleSheets(data) {
 2. Select some karts with issues
 3. Fill out the problems
 4. Click "Submit All Checklists"
-5. Check your Google Sheet - you should see a new row with the data!
+5. Check your Google Sheet - you should see data in all 4 sheets!
+
+## 📊 Understanding the New Sheets
+
+### 1. **Submissions_OLD** (Your existing data)
+- Contains all your previous submissions
+- Same format as before
+- Continues to work exactly as before
+
+### 2. **Kart_Overview** (Main tracking sheet)
+- **One row per kart per check** (36 rows per submission)
+- Shows status: "Good" or "Issues"
+- Lists all problems found for that kart
+- Includes kart-specific remarks
+- **Perfect for**: Tracking individual kart history
+
+### 3. **Error_Log** (Problems tracking)
+- **One row per problem found**
+- Shows which kart had which specific problem
+- Includes problem descriptions
+- **Perfect for**: Finding all karts with "brakes" issues, etc.
+
+### 4. **Submissions_Summary** (Weekly overview)
+- **One row per weekly check**
+- Shows total karts checked, issues found, etc.
+- **Perfect for**: Weekly progress tracking
+
+## 🔍 How to Use the New System
+
+### Find Problems by Kart:
+1. Go to **Kart_Overview** sheet
+2. Filter by Kart_Number column
+3. See complete history for any specific kart
+
+### Find All Karts with Specific Problem:
+1. Go to **Error_Log** sheet
+2. Filter by Problem_Type column
+3. See all karts that had "brakes" issues, etc.
+
+### Track Weekly Progress:
+1. Go to **Submissions_Summary** sheet
+2. See overview of each weekly check
+3. Track improvement over time
 
 ---
 

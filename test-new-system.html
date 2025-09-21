@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test New Google Sheets System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        .success { border-color: #4CAF50; background: #f1f8e9; }
+        .error { border-color: #f44336; background: #ffebee; }
+        .info { border-color: #2196F3; background: #e3f2fd; }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover { background: #1976D2; }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #2196F3;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test New Google Sheets System</h1>
+        <p>This page helps you test the new Google Sheets integration with the enhanced tracking system.</p>
+
+        <div class="test-section info">
+            <h3>📋 What This Tests</h3>
+            <ul>
+                <li>✅ <strong>Submissions_OLD</strong> - Your existing data (preserved)</li>
+                <li>✅ <strong>Kart_Overview</strong> - All 36 karts tracked per submission</li>
+                <li>✅ <strong>Error_Log</strong> - Individual problems logged separately</li>
+                <li>✅ <strong>Submissions_Summary</strong> - Weekly check summaries</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Test Data Submission</h3>
+            <p>This will submit test data to your Google Sheets to verify the new system works.</p>
+            <button onclick="testSubmission()" id="testBtn">Test New System</button>
+            <div id="testResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Expected Results</h3>
+            <p>After running the test, check your Google Sheets for:</p>
+            <ul>
+                <li><strong>Submissions_OLD</strong>: 1 new row with test data</li>
+                <li><strong>Kart_Overview</strong>: 36 new rows (all karts tracked)</li>
+                <li><strong>Error_Log</strong>: 3 new rows (problems for karts 5, 12, 23)</li>
+                <li><strong>Submissions_Summary</strong>: 1 new row with summary</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🔗 Quick Links</h3>
+            <p>
+                <a href="https://docs.google.com/spreadsheets/d/1sCTKJzF1b7pZ5bB1AFD8Y-Hzx2HXI4x5AhVMNVi6gM8/edit" target="_blank">
+                    📊 Open Google Spreadsheet
+                </a>
+            </p>
+            <p>
+                <a href="index.html" target="_blank">
+                    🏁 Open Main Kart Check System
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwyJu5BfLSrNHIyfjbwlDOv7ong6PFhIIBfoRVtaurZxx37aX-oK8CGVrsXP2l7fbok/exec';
+
+        async function testSubmission() {
+            const testBtn = document.getElementById('testBtn');
+            const resultDiv = document.getElementById('testResult');
+            
+            testBtn.innerHTML = '<span class="loading"></span> Testing...';
+            testBtn.disabled = true;
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            resultDiv.textContent = 'Submitting test data...';
+
+            try {
+                // Generate test data
+                const submissionId = 'TEST_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                const testData = {
+                    date: new Date().toLocaleDateString('en-GB'),
+                    center: 'Gent 2025',
+                    timestamp: new Date().toISOString(),
+                    submissionId: submissionId,
+                    kartsWithIssues: [5, 12, 23], // Test karts with issues
+                    kartProblems: {
+                        5: {
+                            issues: ['brakes', 'tires'],
+                            otherFailures: 'Brake pedal feels spongy, front left tire low pressure'
+                        },
+                        12: {
+                            issues: ['steering'],
+                            otherFailures: 'Steering wheel has play'
+                        },
+                        23: {
+                            issues: ['buttons', 'safety_belt'],
+                            otherFailures: 'Start button not responding, left safety belt frayed'
+                        }
+                    },
+                    otherFailures: 'General maintenance needed on track surface',
+                    inspector: 'Test User'
+                };
+
+                console.log('Submitting test data:', testData);
+
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=UTF-8'
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                const result = await response.json();
+                console.log('Response:', result);
+
+                if (result.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ SUCCESS! Test data submitted successfully.
+
+Submission ID: ${result.submissionId}
+
+Check your Google Sheets for:
+• Submissions_OLD: 1 new row
+• Kart_Overview: 36 new rows (all karts)
+• Error_Log: 3 new rows (problems for karts 5, 12, 23)
+• Submissions_Summary: 1 new row
+
+Spreadsheet URL: ${result.spreadsheetUrl}`;
+                } else {
+                    throw new Error(result.error || 'Unknown error');
+                }
+
+            } catch (error) {
+                console.error('Test failed:', error);
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ TEST FAILED: ${error.message}
+
+Please check:
+1. Google Apps Script is deployed correctly
+2. Web app URL is correct
+3. Spreadsheet permissions are set properly
+4. Browser console for more details`;
+            } finally {
+                testBtn.innerHTML = 'Test New System';
+                testBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -391,11 +391,15 @@ async function submitAllChecklists() {
     
     const otherFailuresValue = document.getElementById('otherFailures').value.trim();
     
+    // Generate unique submission ID
+    const submissionId = 'SUB_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    
     // Prepare data for submission
     const checklistEntry = {
         date: currentDate,
         center: 'Gent 2025',
         timestamp: new Date().toISOString(),
+        submissionId: submissionId,
         kartsWithIssues: Array.from(selectedKarts).sort((a, b) => a - b),
         kartProblems: kartProblems,
         otherFailures: otherFailuresValue,
@@ -419,11 +423,11 @@ async function submitAllChecklists() {
         await submitToGoogleSheets(checklistEntry);
         
         // Show success animation
-        showSuccessAnimation(selectedKarts.size, Object.values(kartProblems).reduce((total, problems) => total + problems.issues.length, 0));
+        showSuccessAnimation(selectedKarts.size, Object.values(kartProblems).reduce((total, problems) => total + problems.issues.length, 0), submissionId);
         
     } catch (error) {
         console.error('Error submitting to Google Sheets:', error);
-        showSuccessAnimation(selectedKarts.size, Object.values(kartProblems).reduce((total, problems) => total + problems.issues.length, 0));
+        showSuccessAnimation(selectedKarts.size, Object.values(kartProblems).reduce((total, problems) => total + problems.issues.length, 0), submissionId);
     }
     
     // Reset button state
@@ -708,7 +712,7 @@ function saveStoredData() {
 }
 
 // Show success animation
-function showSuccessAnimation(kartCount, issueCount) {
+function showSuccessAnimation(kartCount, issueCount, submissionId = null) {
     const animation = document.getElementById('successAnimation');
     const submittedKarts = document.getElementById('submittedKarts');
     const issuesFound = document.getElementById('issuesFound');
@@ -716,6 +720,21 @@ function showSuccessAnimation(kartCount, issueCount) {
     // Update stats
     submittedKarts.textContent = kartCount;
     issuesFound.textContent = issueCount;
+    
+    // Add submission ID to the success message if provided
+    if (submissionId) {
+        const successContent = animation.querySelector('.success-content');
+        let submissionInfo = successContent.querySelector('.submission-info');
+        
+        if (!submissionInfo) {
+            submissionInfo = document.createElement('div');
+            submissionInfo.className = 'submission-info';
+            submissionInfo.style.cssText = 'margin-top: 15px; font-size: 0.9rem; opacity: 0.8;';
+            successContent.appendChild(submissionInfo);
+        }
+        
+        submissionInfo.innerHTML = `<strong>Submission ID:</strong> ${submissionId}`;
+    }
     
     // Show animation
     animation.style.display = 'flex';
