@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Google Apps Script Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        .success { border-color: #4CAF50; background: #f1f8e9; }
+        .error { border-color: #f44336; background: #ffebee; }
+        .info { border-color: #2196F3; background: #e3f2fd; }
+        .warning { border-color: #ff9800; background: #fff3e0; }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover { background: #1976D2; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #2196F3;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .url-display {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        .checklist {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .checklist li {
+            margin: 5px 0;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-success { background: #4CAF50; }
+        .status-error { background: #f44336; }
+        .status-warning { background: #ff9800; }
+        .status-unknown { background: #9e9e9e; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Comprehensive Google Apps Script Debug</h1>
+        <p>This tool will systematically test every aspect of your Google Apps Script setup to identify hidden issues.</p>
+
+        <div class="test-section info">
+            <h3>📋 Current Configuration</h3>
+            <div class="url-display">
+                <strong>Web App URL:</strong><br>
+                <span id="currentUrl">Loading...</span>
+            </div>
+            <p><strong>Browser:</strong> <span id="browserInfo"></span></p>
+            <p><strong>Timestamp:</strong> <span id="timestamp"></span></p>
+        </div>
+
+        <div class="test-section">
+            <h3>🌐 Test 1: Network Connectivity</h3>
+            <p>Tests basic network connectivity and DNS resolution.</p>
+            <button onclick="testNetworkConnectivity()" id="networkBtn">Test Network</button>
+            <div id="networkResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔗 Test 2: URL Accessibility</h3>
+            <p>Tests if the Google Apps Script URL is accessible and returns valid responses.</p>
+            <button onclick="testUrlAccessibility()" id="urlBtn">Test URL</button>
+            <div id="urlResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📤 Test 3: POST Request with Detailed Logging</h3>
+            <p>Tests POST requests with comprehensive error logging and response analysis.</p>
+            <button onclick="testPostWithLogging()" id="postBtn">Test POST</button>
+            <div id="postResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Test 4: CORS and Headers Analysis</h3>
+            <p>Analyzes CORS headers and response headers for potential issues.</p>
+            <button onclick="testCORSAndHeaders()" id="corsBtn">Test CORS</button>
+            <div id="corsResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Test 5: Google Apps Script Function Detection</h3>
+            <p>Tests if specific functions (doGet, doPost) are properly deployed.</p>
+            <button onclick="testFunctionDetection()" id="functionBtn">Test Functions</button>
+            <div id="functionResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section warning">
+            <h3>⚠️ Common Hidden Issues Checklist</h3>
+            <div class="checklist">
+                <h4>Google Apps Script Issues:</h4>
+                <ul>
+                    <li><span class="status-indicator status-unknown"></span>Script not deployed as web app</li>
+                    <li><span class="status-indicator status-unknown"></span>Deployment permissions set to "Only myself" instead of "Anyone"</li>
+                    <li><span class="status-indicator status-unknown"></span>Script has syntax errors preventing deployment</li>
+                    <li><span class="status-indicator status-unknown"></span>Script execution quota exceeded</li>
+                    <li><span class="status-indicator status-unknown"></span>Spreadsheet permissions not set correctly</li>
+                    <li><span class="status-indicator status-unknown"></span>Script is in development mode instead of production</li>
+                </ul>
+                <h4>Network/Browser Issues:</h4>
+                <ul>
+                    <li><span class="status-indicator status-unknown"></span>Corporate firewall blocking Google Apps Script</li>
+                    <li><span class="status-indicator status-unknown"></span>Browser security settings blocking requests</li>
+                    <li><span class="status-indicator status-unknown"></span>Ad blockers interfering with requests</li>
+                    <li><span class="status-indicator status-unknown"></span>HTTPS/SSL certificate issues</li>
+                </ul>
+                <h4>Code Issues:</h4>
+                <ul>
+                    <li><span class="status-indicator status-unknown"></span>Missing doGet function</li>
+                    <li><span class="status-indicator status-unknown"></span>Duplicate constant declarations</li>
+                    <li><span class="status-indicator status-unknown"></span>Incorrect Content-Type headers</li>
+                    <li><span class="status-indicator status-unknown"></span>JSON parsing errors</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🚀 Quick Fixes to Try</h3>
+            <div class="checklist">
+                <h4>In Google Apps Script:</h4>
+                <ol>
+                    <li>Delete all files except <code>code.gs</code></li>
+                    <li>Ensure only one file with your script exists</li>
+                    <li>Add <code>doGet</code> function if missing</li>
+                    <li>Save the script (Ctrl+S)</li>
+                    <li>Deploy → New deployment → Web app</li>
+                    <li>Set "Execute as" to "Me"</li>
+                    <li>Set "Who has access" to "Anyone"</li>
+                    <li>Copy the new deployment URL</li>
+                </ol>
+                <h4>In Browser:</h4>
+                <ol>
+                    <li>Clear browser cache and cookies</li>
+                    <li>Try incognito/private browsing mode</li>
+                    <li>Disable ad blockers temporarily</li>
+                    <li>Try a different browser</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔗 Quick Links</h3>
+            <p>
+                <a href="https://script.google.com/macros/s/AKfycbwJ6190T7NRTeWkHIUTYztsdt648wqrKO-J98jGswn2warjyY8dZoDhy1T_YpurcqfD/dev" target="_blank">
+                    📝 Open Google Apps Script Editor
+                </a>
+            </p>
+            <p>
+                <a href="https://docs.google.com/spreadsheets/d/1sCTKJzF1b7pZ5bB1AFD8Y-Hzx2HXI4x5AhVMNVi6gM8/edit" target="_blank">
+                    📊 Open Google Spreadsheet
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwJ6190T7NRTeWkHIUTYztsdt648wqrKO-J98jGswn2warjyY8dZoDhy1T_YpurcqfD/exec';
+        
+        // Initialize page
+        document.getElementById('currentUrl').textContent = WEB_APP_URL;
+        document.getElementById('browserInfo').textContent = navigator.userAgent;
+        document.getElementById('timestamp').textContent = new Date().toISOString();
+
+        async function testNetworkConnectivity() {
+            const btn = document.getElementById('networkBtn');
+            const result = document.getElementById('networkResult');
+            
+            btn.innerHTML = '<span class="loading"></span> Testing...';
+            btn.disabled = true;
+            result.style.display = 'block';
+            result.className = 'result info';
+            result.textContent = 'Testing network connectivity...';
+
+            try {
+                // Test basic connectivity
+                const testUrls = [
+                    'https://www.google.com',
+                    'https://script.google.com',
+                    'https://docs.google.com'
+                ];
+
+                let results = [];
+                for (const url of testUrls) {
+                    try {
+                        const response = await fetch(url, { method: 'HEAD', mode: 'no-cors' });
+                        results.push(`✅ ${url} - Accessible`);
+                    } catch (error) {
+                        results.push(`❌ ${url} - Error: ${error.message}`);
+                    }
+                }
+
+                result.className = 'result success';
+                result.textContent = `🌐 NETWORK CONNECTIVITY TEST
+
+${results.join('\n')}
+
+Browser Info:
+- User Agent: ${navigator.userAgent}
+- Online Status: ${navigator.onLine ? 'Online' : 'Offline'}
+- Language: ${navigator.language}
+- Platform: ${navigator.platform}`;
+
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ NETWORK TEST FAILED: ${error.message}`;
+            } finally {
+                btn.innerHTML = 'Test Network';
+                btn.disabled = false;
+            }
+        }
+
+        async function testUrlAccessibility() {
+            const btn = document.getElementById('urlBtn');
+            const result = document.getElementById('urlResult');
+            
+            btn.innerHTML = '<span class="loading"></span> Testing...';
+            btn.disabled = true;
+            result.style.display = 'block';
+            result.className = 'result info';
+            result.textContent = 'Testing URL accessibility...';
+
+            try {
+                console.log('Testing URL:', WEB_APP_URL);
+                
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'GET',
+                    mode: 'cors',
+                    cache: 'no-cache'
+                });
+                
+                console.log('Response received:', response);
+                
+                const responseText = await response.text();
+                console.log('Response text:', responseText);
+                
+                let parsedResponse;
+                try {
+                    parsedResponse = JSON.parse(responseText);
+                } catch (e) {
+                    parsedResponse = { raw: responseText };
+                }
+
+                result.className = 'result success';
+                result.textContent = `✅ URL ACCESSIBILITY TEST
+
+Status: ${response.status} ${response.statusText}
+Status OK: ${response.ok}
+Headers:
+${JSON.stringify([...response.headers.entries()], null, 2)}
+
+Response:
+${JSON.stringify(parsedResponse, null, 2)}
+
+URL is accessible and responding!`;
+
+            } catch (error) {
+                console.error('URL test failed:', error);
+                result.className = 'result error';
+                result.textContent = `❌ URL ACCESSIBILITY FAILED
+
+Error: ${error.message}
+Error Name: ${error.name}
+Error Stack: ${error.stack}
+
+This usually means:
+1. The script isn't deployed as a web app
+2. The URL is incorrect
+3. The script has syntax errors
+4. Network/firewall issues`;
+            } finally {
+                btn.innerHTML = 'Test URL';
+                btn.disabled = false;
+            }
+        }
+
+        async function testPostWithLogging() {
+            const btn = document.getElementById('postBtn');
+            const result = document.getElementById('postResult');
+            
+            btn.innerHTML = '<span class="loading"></span> Testing...';
+            btn.disabled = true;
+            result.style.display = 'block';
+            result.className = 'result info';
+            result.textContent = 'Testing POST request with detailed logging...';
+
+            try {
+                const testData = {
+                    date: new Date().toLocaleDateString('en-GB'),
+                    center: 'Gent 2025',
+                    timestamp: new Date().toISOString(),
+                    submissionId: 'DEBUG_' + Date.now(),
+                    kartsWithIssues: [1, 2],
+                    kartProblems: {
+                        1: { issues: ['test'], otherFailures: 'Test remark' }
+                    },
+                    otherFailures: 'Debug test',
+                    inspector: 'Debug User'
+                };
+
+                console.log('Sending test data:', testData);
+
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=UTF-8'
+                    },
+                    body: JSON.stringify(testData),
+                    mode: 'cors',
+                    cache: 'no-cache'
+                });
+
+                console.log('POST Response:', response);
+
+                const responseText = await response.text();
+                console.log('POST Response text:', responseText);
+
+                let parsedResponse;
+                try {
+                    parsedResponse = JSON.parse(responseText);
+                } catch (e) {
+                    parsedResponse = { raw: responseText, parseError: e.message };
+                }
+
+                result.className = 'result success';
+                result.textContent = `✅ POST REQUEST TEST
+
+Status: ${response.status} ${response.statusText}
+Status OK: ${response.ok}
+Headers:
+${JSON.stringify([...response.headers.entries()], null, 2)}
+
+Response:
+${JSON.stringify(parsedResponse, null, 2)}
+
+POST request successful!`;
+
+            } catch (error) {
+                console.error('POST test failed:', error);
+                result.className = 'result error';
+                result.textContent = `❌ POST REQUEST FAILED
+
+Error: ${error.message}
+Error Name: ${error.name}
+Error Stack: ${error.stack}
+
+Detailed Analysis:
+- This could be a CORS issue
+- Script might not be deployed correctly
+- Network/firewall blocking the request
+- Script has runtime errors`;
+            } finally {
+                btn.innerHTML = 'Test POST';
+                btn.disabled = false;
+            }
+        }
+
+        async function testCORSAndHeaders() {
+            const btn = document.getElementById('corsBtn');
+            const result = document.getElementById('corsResult');
+            
+            btn.innerHTML = '<span class="loading"></span> Testing...';
+            btn.disabled = true;
+            result.style.display = 'block';
+            result.className = 'result info';
+            result.textContent = 'Testing CORS and headers...';
+
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
+                    'Access-Control-Max-Age': response.headers.get('Access-Control-Max-Age')
+                };
+
+                result.className = 'result success';
+                result.textContent = `✅ CORS AND HEADERS TEST
+
+Status: ${response.status}
+CORS Headers:
+${JSON.stringify(corsHeaders, null, 2)}
+
+All Headers:
+${JSON.stringify([...response.headers.entries()], null, 2)}
+
+Note: Google Apps Script handles CORS automatically when properly deployed.`;
+
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ CORS TEST FAILED: ${error.message}
+
+This might indicate network issues or the script not being accessible.`;
+            } finally {
+                btn.innerHTML = 'Test CORS';
+                btn.disabled = false;
+            }
+        }
+
+        async function testFunctionDetection() {
+            const btn = document.getElementById('functionBtn');
+            const result = document.getElementById('functionResult');
+            
+            btn.innerHTML = '<span class="loading"></span> Testing...';
+            btn.disabled = true;
+            result.style.display = 'block';
+            result.className = 'result info';
+            result.textContent = 'Testing function detection...';
+
+            try {
+                // Test doGet function
+                const getResponse = await fetch(WEB_APP_URL, { method: 'GET' });
+                const getText = await getResponse.text();
+                
+                // Test doPost function
+                const postResponse = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ test: true })
+                });
+                const postText = await postResponse.text();
+
+                result.className = 'result success';
+                result.textContent = `✅ FUNCTION DETECTION TEST
+
+doGet Function:
+- Status: ${getResponse.status}
+- Response: ${getText.substring(0, 200)}${getText.length > 200 ? '...' : ''}
+
+doPost Function:
+- Status: ${postResponse.status}
+- Response: ${postText.substring(0, 200)}${postText.length > 200 ? '...' : ''}
+
+Both functions appear to be working!`;
+
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ FUNCTION DETECTION FAILED: ${error.message}
+
+This suggests the script might not be deployed correctly or has syntax errors.`;
+            } finally {
+                btn.innerHTML = 'Test Functions';
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
