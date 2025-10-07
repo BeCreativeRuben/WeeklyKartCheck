@@ -7,14 +7,34 @@ let currentDate = new Date().toLocaleDateString('en-GB'); // Format: DD/MM/YYYY
 let currentLanguage = 'en'; // Current language
 let isSubmitting = false; // Prevent double submission
 
+// LocalStorage keys
+const STORAGE_KEYS = {
+    SELECTED_KARTS: 'kartCheck_selectedKarts',
+    KART_PROBLEMS: 'kartCheck_kartProblems',
+    OTHER_FAILURES: 'kartCheck_otherFailures',
+    INSPECTOR_NAME: 'kartCheck_inspectorName',
+    CURRENT_LANGUAGE: 'kartCheck_currentLanguage',
+    SESSION_DATA: 'kartCheck_sessionData'
+};
+
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
-    // Reset everything on page load
-    resetAllData();
+    // Try to restore previous session data
+    restoreSessionData();
     
     initializeKartGrid();
     setupEventListeners();
     updateCurrentDate();
+    
+    // Show recovery message if data was restored
+    if (hasRestoredData()) {
+        showMessage(
+            currentLanguage === 'en' 
+                ? '📋 Previous session data restored! Your work has been saved locally.'
+                : '📋 Vorige sessie data hersteld! Je werk is lokaal opgeslagen.',
+            'success'
+        );
+    }
 });
 
 // Update current date display
@@ -60,6 +80,17 @@ function setupEventListeners() {
     // Dashboard controls
     document.getElementById('viewDashboard').addEventListener('click', showDashboard);
     document.getElementById('backToChecklist').addEventListener('click', showChecklist);
+    
+    // Auto-save on input changes
+    document.getElementById('otherFailures').addEventListener('input', autoSave);
+    document.getElementById('inspectorName').addEventListener('input', autoSave);
+    document.getElementById('kartOtherFailures').addEventListener('input', autoSave);
+    
+    // Auto-save on checkbox changes in checklist
+    const checklistCheckboxes = document.querySelectorAll('#detailedChecklist input[type="checkbox"]');
+    checklistCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', autoSave);
+    });
 }
 
 // Select a kart for editing problems
@@ -93,6 +124,9 @@ function selectKartForEditing(kartNumber) {
     // Update display
     updateSelectedKartsList();
     showKartChecklist(kartNumber);
+    
+    // Auto-save after kart selection
+    autoSave();
 }
 
 // Show checklist for specific kart
@@ -190,6 +224,9 @@ function saveKartProblems() {
         : `Problemen opgeslagen voor Kart #${currentEditingKart}`;
     showMessage(message, 'success');
     
+    // Auto-save after saving kart problems
+    autoSave();
+    
     // Clear the form
     clearKartChecklistForm();
     
@@ -229,6 +266,9 @@ function clearKartProblems() {
     
     // Update display
     updateSelectedKartsList();
+    
+    // Auto-save after clearing kart problems
+    autoSave();
     
     const message = currentLanguage === 'en' 
         ? `Kart #${kartNumber} cleared and removed from issues list.`
@@ -292,6 +332,9 @@ function removeKart(kartNumber) {
     
     updateSelectedKartsList();
     
+    // Auto-save after removing kart
+    autoSave();
+    
     // If this was the current editing kart, hide the form
     if (currentEditingKart === kartNumber) {
         document.getElementById('kartChecklistSection').style.display = 'none';
@@ -303,6 +346,9 @@ function removeKart(kartNumber) {
 function toggleLanguage() {
     currentLanguage = currentLanguage === 'en' ? 'nl' : 'en';
     updateLanguage();
+    
+    // Auto-save after language change
+    autoSave();
 }
 
 // Update language throughout the interface
@@ -438,7 +484,13 @@ async function submitAllChecklists() {
     
     // Clear form after animation
     setTimeout(() => {
-        clearAll();
+        resetAllData();
+        clearAllStoredData();
+        
+        const message = currentLanguage === 'en' 
+            ? 'Data submitted successfully! All local data cleared.'
+            : 'Data succesvol verstuurd! Alle lokale data gewist.';
+        showMessage(message, 'success');
     }, 3000);
 }
 
@@ -446,9 +498,12 @@ async function submitAllChecklists() {
 function clearAll() {
     resetAllData();
     
+    // Clear all stored data
+    clearAllStoredData();
+    
     const message = currentLanguage === 'en' 
-        ? 'All selections cleared.'
-        : 'Alle selecties gewist.';
+        ? 'All selections cleared and data removed from local storage.'
+        : 'Alle selecties gewist en data verwijderd uit lokale opslag.';
     showMessage(message, 'success');
 }
 
@@ -711,6 +766,168 @@ function showSmallError(message) {
 // Save data to localStorage (for Google Sheets submission only)
 function saveStoredData() {
     localStorage.setItem('kartChecklistData', JSON.stringify(checklistData));
+}
+
+// ===== LOCALSTORAGE FUNCTIONS =====
+
+// Save current session data to localStorage
+function saveSessionData() {
+    try {
+        const sessionData = {
+            selectedKarts: Array.from(selectedKarts),
+            kartProblems: kartProblems,
+            otherFailures: document.getElementById('otherFailures').value,
+            inspectorName: document.getElementById('inspectorName').value,
+            currentLanguage: currentLanguage,
+            timestamp: new Date().toISOString()
+        };
+        
+        localStorage.setItem(STORAGE_KEYS.SESSION_DATA, JSON.stringify(sessionData));
+        console.log('Session data saved to localStorage');
+    } catch (error) {
+        console.error('Error saving session data:', error);
+    }
+}
+
+// Restore session data from localStorage
+function restoreSessionData() {
+    try {
+        const savedData = localStorage.getItem(STORAGE_KEYS.SESSION_DATA);
+        if (!savedData) {
+            console.log('No saved session data found');
+            return false;
+        }
+        
+        const sessionData = JSON.parse(savedData);
+        
+        // Restore selected karts
+        if (sessionData.selectedKarts && Array.isArray(sessionData.selectedKarts)) {
+            selectedKarts = new Set(sessionData.selectedKarts);
+        }
+        
+        // Restore kart problems
+        if (sessionData.kartProblems && typeof sessionData.kartProblems === 'object') {
+            kartProblems = sessionData.kartProblems;
+        }
+        
+        // Restore other failures
+        if (sessionData.otherFailures) {
+            document.getElementById('otherFailures').value = sessionData.otherFailures;
+        }
+        
+        // Restore inspector name
+        if (sessionData.inspectorName) {
+            document.getElementById('inspectorName').value = sessionData.inspectorName;
+        }
+        
+        // Restore language
+        if (sessionData.currentLanguage) {
+            currentLanguage = sessionData.currentLanguage;
+        }
+        
+        // Update UI to reflect restored data
+        updateUIAfterRestore();
+        
+        console.log('Session data restored from localStorage');
+        return true;
+        
+    } catch (error) {
+        console.error('Error restoring session data:', error);
+        return false;
+    }
+}
+
+// Update UI after restoring data
+function updateUIAfterRestore() {
+    // Update kart buttons to show selected state
+    selectedKarts.forEach(kartNumber => {
+        const kartButton = document.querySelector(`[data-kart-number="${kartNumber}"]`);
+        if (kartButton) {
+            kartButton.classList.add('has-issues');
+        }
+    });
+    
+    // Update selected karts list
+    updateSelectedKartsList();
+    
+    // Update language
+    updateLanguage();
+}
+
+// Check if data was restored
+function hasRestoredData() {
+    return selectedKarts.size > 0 || Object.keys(kartProblems).length > 0 || 
+           document.getElementById('otherFailures').value.trim() !== '';
+}
+
+// Clear all localStorage data
+function clearAllStoredData() {
+    try {
+        Object.values(STORAGE_KEYS).forEach(key => {
+            localStorage.removeItem(key);
+        });
+        console.log('All stored data cleared');
+    } catch (error) {
+        console.error('Error clearing stored data:', error);
+    }
+}
+
+// Auto-save function (called on data changes)
+function autoSave() {
+    saveSessionData();
+    showAutoSaveIndicator();
+}
+
+// Show auto-save indicator
+function showAutoSaveIndicator() {
+    // Remove existing indicator
+    const existingIndicator = document.querySelector('.auto-save-indicator');
+    if (existingIndicator) {
+        existingIndicator.remove();
+    }
+    
+    // Create new indicator
+    const indicator = document.createElement('div');
+    indicator.className = 'auto-save-indicator';
+    indicator.innerHTML = '💾 Auto-saved';
+    indicator.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background: rgba(39, 174, 96, 0.9);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        z-index: 1000;
+        animation: fadeInOut 2s ease-in-out;
+        box-shadow: 0 2px 10px rgba(39, 174, 96, 0.3);
+    `;
+    
+    // Add CSS animation if not already added
+    if (!document.querySelector('#auto-save-styles')) {
+        const style = document.createElement('style');
+        style.id = 'auto-save-styles';
+        style.textContent = `
+            @keyframes fadeInOut {
+                0% { opacity: 0; transform: translateY(-10px); }
+                20% { opacity: 1; transform: translateY(0); }
+                80% { opacity: 1; transform: translateY(0); }
+                100% { opacity: 0; transform: translateY(-10px); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(indicator);
+    
+    // Auto-remove after animation
+    setTimeout(() => {
+        if (indicator.parentNode) {
+            indicator.remove();
+        }
+    }, 2000);
 }
 
 // Show success animation
